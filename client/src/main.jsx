@@ -1,29 +1,27 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import { ChakraProvider, extendTheme } from '@chakra-ui/react'
-import UserState from './context/user/userState';
-import AlertState from './context/alert/alertState';
-import ResultState from './context/result/resultState';
-import "./App.css"
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import UserState from "./context/user/userState";
+import ResultState from "./context/result/resultState";
+import { ColorModeScript } from "@chakra-ui/react";
+import "./App.css";
 
 const config = {
-  initialColorMode: 'light',
+  initialColorMode: "light",
   useSystemColorMode: false,
-}
-const theme = extendTheme({ config })
+};
+const theme = extendTheme({ config });
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <ChakraProvider theme={theme}>
-      <AlertState>
       <UserState>
         <ResultState>
-        <App />
+          <App />
         </ResultState>
-      
       </UserState>
-      </AlertState>
     </ChakraProvider>
   </React.StrictMode>
-)
+);

@@ -1,116 +1,145 @@
 import {
-   Flex,
-   Box,
-   FormControl,
-   FormLabel,
-   Input,
-   Stack,
-   Link,
-   Button,
-   Heading,
-   Text,
-   useColorModeValue,
-   FormErrorMessage,
-   Spinner
- } from '@chakra-ui/react';
- import { useContext } from 'react';
- import { Formik, Field } from "formik";
- import {Link as RouterLink, Navigate} from  "react-router-dom"  
-import UserContext from '../../context/user/userContext';
-
-
-const Login = ()=> {
-
-    const userContext = useContext(UserContext)
-    const {loading ,login, isAuthenticated} = userContext
-
-    if(isAuthenticated){
-      return <Navigate to="/"/>
+  Flex,
+  Box,
+  FormControl,
+  FormLabel,
+  Input,
+  Stack,
+  Link,
+  Button,
+  Heading,
+  Text,
+  useColorModeValue,
+  FormErrorMessage,
+  Spinner,
+} from "@chakra-ui/react";
+import { useContext, useEffect } from "react";
+import { Formik, Field } from "formik";
+import { Link as RouterLink, Navigate } from "react-router-dom";
+import UserContext from "../../context/user/userContext";
+import { useToast } from "@chakra-ui/react";
+import { useSearchParams } from "react-router-dom";
+const Login = () => {
+  const userContext = useContext(UserContext);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const toast = useToast();
+  useEffect(() => {
+    console.log(searchParams.get("alertType"));
+    console.log(searchParams.get("alertMsg"));
+    if (searchParams.get("alertType") && searchParams.get("alertMsg")) {
+      console.log("alert");
+      setTimeout(() => {
+        toast({
+          title: searchParams.get("alertMsg"),
+          status: searchParams.get("alertType"),
+          duration: 9000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }, 1000);
     }
 
-   return (
-     <Flex
-       minH={'100vh'}
-       align={'center'}
-       justify={'center'}
-       w={"full"}
-       bg={useColorModeValue('gray.50', 'gray.800')}>
-       <Stack w={"full"}k spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-         <Stack align={'center'}>
-           <Heading fontSize={'4xl'}>Přihlaš se</Heading>
-           <Text fontSize={'lg'} color={'gray.600'}>
-             a poznej svou <Text style={{display:"inline"}} color={'teal.400'}>osobnost</Text> ✌️
-           </Text>
-         </Stack>
-         <Box
-           rounded={'lg'}
-           bg={useColorModeValue('white', 'gray.700')}
-           boxShadow={'lg'}
-           p={8}>
-             <Formik
-          initialValues={{
-            email: "",
-            password: ""
-          }}
-          onSubmit={(values) => {
-            login(values.email, values.password)
-          }}
+    searchParams.delete("alertType");
+    searchParams.delete("alertMsg");
+    setSearchParams(searchParams);
+  }, []);
+  const { loading, login, isAuthenticated } = userContext;
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  return (
+    <Flex
+      minH={"100vh"}
+      align={"center"}
+      justify={"center"}
+      w={"full"}
+      bg={useColorModeValue("gray.50", "gray.800")}
+    >
+      <Stack w={"full"} k spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
+        <Stack align={"center"}>
+          <Heading fontSize={"4xl"}>Přihlaš se</Heading>
+          <Text fontSize={"lg"} color={"gray.600"}>
+            a poznej svou{" "}
+            <Text style={{ display: "inline" }} color={"teal.400"}>
+              osobnost
+            </Text>{" "}
+            ✌️
+          </Text>
+        </Stack>
+        <Box
+          rounded={"lg"}
+          bg={useColorModeValue("white", "gray.700")}
+          boxShadow={"lg"}
+          p={8}
+        >
+          <Formik
+            initialValues={{
+              email: "",
+              password: "",
+            }}
+            onSubmit={(values) => {
+              login(values.email, values.password);
+            }}
           >
+            {({ handleSubmit, errors, touched }) => (
+              <form onSubmit={handleSubmit}>
+                <Stack spacing={4}>
+                  <FormControl id="email">
+                    <FormLabel>Email</FormLabel>
+                    <Field as={Input} id="email" name="email" type="email" />
+                  </FormControl>
+                  <FormControl
+                    id="password"
+                    isInvalid={!!errors.password && touched.password}
+                  >
+                    <FormLabel>Heslo</FormLabel>
+                    <Field
+                      as={Input}
+                      id="password"
+                      name="password"
+                      type="password"
+                      validate={(value) => {
+                        let error;
 
-          {({ handleSubmit, errors, touched }) => (
-             <form onSubmit={handleSubmit}>
-           <Stack spacing={4}>
-             <FormControl id="email">
-               <FormLabel>Email</FormLabel>
-               <Field as={Input}
-                    id="email"
-                    name="email"
-                    type="email"
+                        if (value.length <= 5) {
+                          error = "Heslo musí obsahovat aspoň 6 znaků";
+                        }
+
+                        return error;
+                      }}
                     />
-             </FormControl>
-             <FormControl id="password" isInvalid={!!errors.password && touched.password}>
-               <FormLabel>Heslo</FormLabel>
-               <Field
-                   as={Input}
-                   id="password"
-                   name="password"
-                   type="password"
-                  
-                   validate={(value) => {
-                     let error;
+                    <FormErrorMessage>{errors.password}</FormErrorMessage>
+                  </FormControl>
+                  <Stack spacing={10}>
+                    <Button
+                      type="submit"
+                      bg={"teal.400"}
+                      color={"white"}
+                      _hover={{
+                        bg: "teal.500",
+                      }}
+                    >
+                      {loading ? <Spinner /> : "Přihlásit se"}
+                    </Button>
+                  </Stack>
+                  <Stack pt={6}>
+                    <Text align={"center"}>
+                      Nemáš učet?
+                      <RouterLink to="/register">
+                        {" "}
+                        <Link color={"teal.400"}>Zaregistruj se</Link>
+                      </RouterLink>
+                    </Text>
+                  </Stack>
+                </Stack>
+              </form>
+            )}
+          </Formik>
+        </Box>
+      </Stack>
+    </Flex>
+  );
+};
 
-                     if (value.length <= 5) {
-                       error = "Heslo musí obsahovat aspoň 6 znaků";
-                     }
-
-                     return error;
-                   }}
-               />
-               <FormErrorMessage>{errors.password}</FormErrorMessage>
-             </FormControl>
-             <Stack spacing={10}>
-               <Button
-                type="submit"
-                 bg={'teal.400'}
-                 color={'white'}
-                 _hover={{
-                   bg: 'teal.500',
-                 }}>
-                 {loading ? <Spinner/>: "Přihlásit se"}
-               </Button>
-             </Stack>
-             <Stack pt={6}>
-           <Text align={'center'}>
-             Nemáš učet?<RouterLink to="/register" > <Link color={'teal.400'}>Zaregistruj se</Link></RouterLink>
-           </Text>
-         </Stack>
-           </Stack>
-           </form>)}
-           </Formik>
-         </Box>
-       </Stack>
-     </Flex>
-   );
- }
-
-export default Login
+export default Login;
